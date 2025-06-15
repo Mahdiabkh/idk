@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<odoo>
+    <data noupdate="1">
+        <record id="email_template_account_activated" model="mail.template">
+            <field name="name">Account Activated Notification</field>
+            <field name="model_id" ref="model_dynamed_inscription_medecin"/>
+            <field name="subject">Votre compte DynaMed a été activé</field>
+            <field name="email_from">{{ object.outgoing_email }}</field>  <!-- Uses default SMTP server from address -->
+            <field name="email_to">{{ object.email }}</field>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <table width="100%" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td align="center" style="padding-bottom: 20px;">
+                                <img src="/logo.png" alt="DynaMed Logo" style="height: 50px;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 20px; background-color: #ffffff; border-radius: 5px;">
+                                <h2 style="color: #875A7B;">Votre compte a été activé avec succès!</h2>
+                                <p>Bonjour Dr. <t t-out="object.name or ''"/>,</p>
+                                <p>Nous sommes heureux de vous informer que votre compte DynaMed a été activé avec succès.</p>
+
+                                <div style="margin: 25px 0; text-align: center;">
+                                    <a href="{{ object.login_url }}"
+                                       style="background-color: #875A7B; color: white; padding: 12px 24px;
+                                              text-decoration: none; border-radius: 4px; font-weight: bold;
+                                              display: inline-block;">
+                                        Accéder à mon compte
+                                    </a>
+                                </div>
+
+                                <p>Vous pouvez maintenant:</p>
+                                <ul>
+                                    <li>Accéder à toutes les fonctionnalités de la plateforme</li>
+                                    <li>Gérer vos patients et consultations</li>
+                                    <li>Accéder à votre espace personnel</li>
+                                </ul>
+
+                                <p>Si vous avez des questions, n'hésitez pas à contacter notre support à
+                                <a href="mailto:support@dynamed.com">support@dynamed.com</a>.</p>
+
+                                <p>Cordialement,<br/>L'équipe DynaMed</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding-top: 20px; text-align: center; font-size: 12px; color: #999999;">
+                                <p>© 2023 DynaMed. Tous droits réservés.</p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

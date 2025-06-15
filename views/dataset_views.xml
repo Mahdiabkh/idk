@@ -1,0 +1,41 @@
+<odoo>
+    <record id="view_dataset_form" model="ir.ui.view">
+        <field name="name">dynamed.dataset.form</field>
+        <field name="model">dynamed.dataset</field>
+        <field name="arch" type="xml">
+            <form create="false" delete="false">
+                <sheet>
+                    <header>
+                        <button string="Importer Data" type="object" name="import_molecules_data" class="btn-primary" invisible="name != 'Details'" />
+                        <button string="Importer Diagnostic Data" type="object" name="import_diagnostics_classes" class="btn-primary" invisible="name != 'Diagnostic'"/>
+                        <button string="Importer Noms Commerciaux"  type="object" name="import_nom_commercial" class="btn-primary" invisible="name != 'Noms commerciaux'"/>
+                        <button string="Importer Interactions"  type="object" name="import_interactions_data" class="btn-primary" invisible="name != 'Interaction'"/>
+                        <button string="Importer Précautions"  type="object" name="import_precautions" class="btn-primary" invisible="name != 'Précautions'"/>
+                    </header>
+                    <group>
+                        <field name="name"/>
+                        <field name="file" filename="file_name"/>
+                        <field name="file_name" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_dataset_tree" model="ir.ui.view">
+        <field name="name">dynamed.dataset.tree</field>
+        <field name="model">dynamed.dataset</field>
+        <field name="arch" type="xml">
+            <tree create="false" delete="false">
+                <field name="name"/>
+                <field name="file_name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_dataset" model="ir.actions.act_window">
+        <field name="name">DataSets</field>
+        <field name="res_model">dynamed.dataset</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

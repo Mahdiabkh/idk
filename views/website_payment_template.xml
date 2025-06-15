@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="upload_payment_form">
+        <t t-call="website.layout">
+            <div class="container">
+                <h1>Paiement d'abonnement</h1>
+                <form t-attf-action="/medecin/upload/payment?inscription_id={{ inscription.id }}"
+                      method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="form-group">
+                        <label>Preuve de paiement *</label>
+                        <input type="file" name="preuve_paiement" required="required"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Soumettre</button>
+                </form>
+            </div>
+        </t>
+    </template>
+    <template id="payment_success_template" name="Confirmation Paiement">
+        <t t-call="website.layout">
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 text-center">
+                        <div class="alert alert-success" role="alert">
+                            <i class="fa fa-check-circle fa-3x mb-3"></i>
+                            <h2 class="alert-heading">Paiement Reçu avec Succès!</h2>
+                            <hr/>
+                            <p class="mb-0">
+                                Votre justificatif de paiement a bien été enregistré.
+                                <br/>
+                                Notre équipe va le vérifier et activera votre compte sous 24 heures.
+                            </p>
+                        </div>
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h5>Prochaines Étapes :</h5>
+                                <ul class="text-left">
+                                    <li>Votre paiement est en cours de vérification</li>
+                                    <li>Vous recevrez un email de confirmation une fois approuvé</li>
+                                    <li>L'accès à votre compte sera activé après validation</li>
+                                </ul>
+                                <a href="/" class="btn btn-primary mt-3">
+                                    Retour à la page d'acceuil
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="payment_received_page" name="Payment Received Page">
+        <t t-call="website.layout">
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h3 class="mb-0">Paiement Reçu</h3>
+                            </div>
+                            <div class="card-body text-center">
+                                <i class="fa fa-check-circle text-success fa-5x mb-4"></i>
+                                <h4 class="text-success">Merci pour votre paiement!</h4>
+                                <p class="lead">
+                                    Nous avons bien reçu votre preuve de paiement.
+                                </p>
+                                <p>
+                                    Notre équipe va vérifier votre document et réactivera
+                                    votre compte dans les 24 heures.
+                                </p>
+                                <p class="mt-4">
+                                    Vous recevrez un email de confirmation une fois votre compte réactivé.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

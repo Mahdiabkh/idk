@@ -1,0 +1,44 @@
+<odoo>
+    <record id="view_clinique_tree" model="ir.ui.view">
+        <field name="name">dynamed.clinique.tree</field>
+        <field name="model">dynamed.clinique</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="name_clinique"/>
+                <field name="adresse_clinique"/>
+                <field name="nombre_medecin"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_clinique_form" model="ir.ui.view">
+        <field name="name">dynamed.clinique.form</field>
+        <field name="model">dynamed.clinique</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="phone"/>
+                        <field name="email"/>
+                        <field name="name_clinique"/>
+                        <field name="adresse_clinique"/>
+                        <field name="nombre_medecin"/>
+                        <field name="offres"/>
+                        <field name="preuve_paiement"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_clinique" model="ir.actions.act_window">
+        <field name="name">Cliniques</field>
+        <field name="res_model">dynamed.clinique</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

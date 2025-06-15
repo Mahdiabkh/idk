@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Create a Custom Category for Dynamed -->
+    <record id="module_category_dynamed" model="ir.module.category">
+        <field name="name">Dynamed</field>
+        <field name="description">Custom category for Dynamed groups</field>
+        <field name="sequence">10</field> <!-- Optional: Controls the order of categories -->
+    </record>
+
+    <!-- Dynamed Admin Group -->
+    <record id="group_dynamed_admin" model="res.groups">
+        <field name="name">Admin</field>
+        <field name="category_id" ref="module_category_dynamed"/> <!-- Assign to Dynamed category -->
+        <field name="users" eval="[(4, ref('base.user_admin'))]"/> <!-- Assign the admin user to this group -->
+    </record>
+
+    <!-- Dynamed Medecin Group -->
+    <record id="group_dynamed_medecin" model="res.groups">
+        <field name="name">Medecin</field>
+        <field name="category_id" ref="module_category_dynamed"/> <!-- Assign to Dynamed category -->
+    </record>
+
+    <record id="group_dynamed_medecin_trial" model="res.groups">
+        <field name="name">Médecin (Essai)</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <!-- Dynamed Clinique Group -->
+    <record id="group_dynamed_clinique" model="res.groups">
+        <field name="name">Clinique</field>
+        <field name="category_id" ref="module_category_dynamed"/> <!-- Assign to Dynamed category -->
+    </record>
+</odoo>

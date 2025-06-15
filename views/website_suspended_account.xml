@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="suspended_account_page" name="Suspended Account Page">
+    <t t-call="website.layout">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-white">
+                            <h3 class="mb-0">Compte Suspendu</h3>
+                        </div>
+                        <div class="card-body">
+                            <h4 class="text-warning">
+                                <i class="fa fa-exclamation-triangle mr-2"></i>
+                                Votre compte a été suspendu
+                            </h4>
+
+                            <p class="lead mt-4">Bonjour <t t-esc="user.name"/>,</p>
+
+                            <div class="alert alert-info">
+                                <t t-if="medecin.en_essai and medecin.date_fin_essai">
+                                    Votre période d'essai a expiré le <t t-esc="medecin.date_fin_essai"/>.
+                                </t>
+                                <t t-else="">
+                                    Votre compte médecin a été suspendu.
+                                </t>
+                            </div>
+
+                            <h5 class="mt-4">Pour réactiver votre compte :</h5>
+                            <ol>
+                                <li>Effectuez le paiement de votre abonnement</li>
+                                <li>Téléchargez votre preuve de paiement</li>
+                                <li>Notre équipe vérifiera votre paiement sous 24h</li>
+                            </ol>
+
+                            <div class="text-center mt-5">
+                                <a href="/medecin/upload/payment?login={login}"
+                                   class="btn btn-primary btn-lg">
+                                    <i class="fa fa-upload mr-2"></i>
+                                    Uploader ma preuve de paiement
+                                </a>
+                            </div>
+
+                            <div class="mt-4 text-muted">
+                                <small>
+                                    Si vous pensez qu'il s'agit d'une erreur, veuillez
+                                    <a href="/contact">contacter notre support</a>.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</template>
+</odoo>

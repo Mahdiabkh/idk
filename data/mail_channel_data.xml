@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Create notification channel for admin -->
+        <record id="channel_admin_notifications" model="discuss.channel">
+            <field name="name">Notifications Administrateurs</field>
+            <field name="description">Toutes les notifications d'inscription et paiement</field>
+            <field name="channel_type">channel</field>
+            <field name="channel_member_ids" eval="[
+                (0, 0, {
+                    'partner_id': ref('dynamed.group_dynamed_admin'),
+                    'custom_channel_name': 'Admin Notifications'
+                })
+            ]"/>
+        </record>
+    </data>
+</odoo>

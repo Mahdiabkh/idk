@@ -1,0 +1,143 @@
+<odoo>
+    <record id="view_consultation_tree" model="ir.ui.view">
+        <field name="name">dynamed.consultation.tree</field>
+        <field name="model">dynamed.consultation</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="date_consultation"/>
+                <field name="patient_id"/>
+                <field name="medecin_id" invisible="1"/>
+                <field name="type_patient"/>
+                <field name="femme_enceinte"/>
+                <field name="femme_allaitante"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="view_consultation_form" model="ir.ui.view">
+        <field name="name">dynamed.consultation.form</field>
+        <field name="model">dynamed.consultation</field>
+        <field name="arch" type="xml">
+            <form class="oe_form">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button string="Ordonnances" type="action" class="oe_stat_button" icon="fa-file-text"
+                                name="%(dynamed.action_prescription_list)d"
+                                action="%(dynamed.action_prescription_list)d">
+                            <field name="prescription_ids" widget="statinfo" string="Ordonnances"/>
+                        </button>
+                    </div>
+                    <group string="Informations du Patient">
+                        <group >
+                            <field name="patient_id"/>
+                            <field name="patient_age" readonly="1"/>
+                            <field name="patient_sexe" readonly="1"/>
+                            <field name="type_patient" widget="radio" options="{'horizontal': true}"/>
+                            <field name="femme_enceinte" invisible="patient_sexe != 'femme'"/>
+                            <field name="femme_allaitante" invisible="patient_sexe != 'femme'"/>
+                        </group>
+                        <group>
+                            <field name="date_consultation"/>
+                            <field name="medecin_id" groups="dynamed.group_dynamed_admin"/>
+                            <field name="medecin_id" groups="dynamed.group_dynamed_medecin" readonly="1"/>
+                        </group>
+
+
+                    </group>
+                    <group string="Détails de la consultation">
+                        <group>
+                        <field name="diagnostics_ids" widget="many2many_tags"
+                               options="{'no_create': True, 'no_open': True}"/>
+                        <field
+                                name="indications_ids"
+                                widget="many2many_tags"
+                                options="{'no_create': True, 'no_open': True}"
+                        />
+                        <field name="precaution_ids" widget="many2many_tags"
+                               options="{'no_create': True, 'no_open': True}"/>
+                            </group>
+                    <group>
+                        <field name="medicament_actuels_ids" widget="many2many_tags"
+                               options="{'no_create': True, 'no_open': True}"/>
+                        <field name="antecedents_medicaux_ids" widget="many2many_tags"
+                               options="{'no_create': True, 'no_open': True}"/>
+                        <field name="allergies_ids" widget="many2many_tags"
+                               options="{'no_create': True, 'no_open': True}"/>
+                    </group>
+                    </group>
+
+                    <div class="oe_form_footer" style="display: flex; justify-content: flex-start;  margin-left: 40px;">
+                        <button string="Générer Ordonnance"
+                                type="object"
+                                name="action_generate_prescription"
+                                class="btn-primary oe_highlight"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_consultation_pivot" model="ir.ui.view">
+        <field name="name">dynamed.consultation.pivot</field>
+        <field name="model">dynamed.consultation</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="patient_id" type="row"/>
+                <field name="medecin_id" type="col"/>
+                <field name="type_patient" type="col"/>
+                <field name="create_date" interval="month" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_consultation_search" model="ir.ui.view">
+        <field name="name">dynamed.consultation.search</field>
+        <field name="model">dynamed.consultation</field>
+        <field name="arch" type="xml">
+            <search>
+                <!-- Champs de recherche de base -->
+                <field name="patient_id" string="Patient"/>
+                <field name="medecin_id" string="Médecin"/>
+                <field name="type_patient" string="Type de Patient"/>
+
+                <!-- Filtres -->
+                <filter name="filter_femme_enceinte" string="Femmes Enceintes"
+                        domain="[('femme_enceinte', '=', True)]"/>
+                <filter name="filter_femme_allaitante" string="Femmes Allaitantes"
+                        domain="[('femme_allaitante', '=', True)]"/>
+                <filter name="filter_today" string="Consultations Aujourd'hui"
+                        domain="[('create_date', '>=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+
+                <!-- Options de Regroupement -->
+                <group expand="1" string="Regrouper Par">
+                    <filter name="group_by_doctor" string="Médecin" context="{'group_by': 'medecin_id'}"/>
+                    <filter name="group_by_patient_type" string="Type de Patient"
+                            context="{'group_by': 'type_patient'}"/>
+                    <filter name="group_by_date" string="Date (Mois)" context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_consultation_graph" model="ir.ui.view">
+        <field name="name">dynamed.consultation.graph</field>
+        <field name="model">dynamed.consultation</field>
+        <field name="arch" type="xml">
+            <graph type="bar">
+                <field name="medecin_id" type="row"/>
+                <field name="type_patient" type="col"/>
+                <field name="patient_id" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Update the existing action to include the new views -->
+    <record id="action_consultation" model="ir.actions.act_window">
+        <field name="name">Consultations</field>
+        <field name="res_model">dynamed.consultation</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="view_id" ref="view_consultation_tree"/>
+    </record>
+</odoo>

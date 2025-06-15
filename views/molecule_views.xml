@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Vue Tree (Liste) -->
+    <record id="view_molecule_tree" model="ir.ui.view">
+        <field name="name">dynamed.molecule.tree</field>
+        <field name="model">dynamed.molecule</field>
+        <field name="arch" type="xml">
+            <tree create="false">
+                <field name="name"/>
+                <field name="categories_age_id" string="Catégorie d'âge"/>
+                <field name="grossesse" string="Grossesse"/>
+                <field name="allaitement" string="Allaitement"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue Form (Formulaire) -->
+    <record id="view_molecule_form" model="ir.ui.view">
+        <field name="name">dynamed.molecule.form</field>
+        <field name="model">dynamed.molecule</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="effet_majeurs"/>
+                        <field name="grossesse"/>
+                        <field name="allaitement"/>
+                        <field name="categories_age_id"/>
+                    </group>
+
+                    <!-- Section pour les relations Many2many -->
+                    <notebook>
+                        <page string="Allergies">
+                            <field name="allergies_ids">
+                                <tree create="false">
+                                    <field name="name"/>
+                                </tree>
+                                <form create="false">
+                                    <field name="name"/>
+                                </form>
+                            </field>
+                        </page>
+
+                        <page string="Antécédents Médicaux">
+                            <field name="antecedents_medicaux_ids">
+                                <tree create="false">
+                                    <field name="name"/>
+                                </tree>
+                                <form create="false">
+                                    <field name="name"/>
+                                </form>
+                            </field>
+                        </page>
+
+                        <page string="Médicaments Actuels">
+                            <field name="medicaments_actuels_ids">
+                                <tree create="false">
+                                    <field name="name"/>
+                                </tree>
+                                <form create="false">
+                                    <field name="name"/>
+                                </form>
+                            </field>
+                        </page>
+
+                        <page string="Indications">
+                            <field name="indications_ids">
+                                <tree create="false">
+                                    <field name="name"/>
+                                </tree>
+                                <form create="false">
+                                    <field name="name"/>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Précautions">
+                            <field name="precaution_ids">
+                                <tree create="false">
+                                    <field name="name"/>
+                                </tree>
+                                <form create="false">
+                                    <field name="name"/>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Classes Médicales">
+                            <field name="classes_medicales_ids">
+                                <tree create="false">
+                                    <field name="name"/>
+                                </tree>
+                                <form create="false">
+                                    <field name="name"/>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Noms commerciaux">
+                            <field name="nom_commercial_ids">
+                                <tree create="false">
+                                    <field name="name"/>
+                                    <field name="dosage"/>
+                                    <field name="forme_pharmaceutique"/>
+                                    <field name="conditionnement"/>
+                                </tree>
+                                <form create="false">
+                                    <field name="name"/>
+                                    <field name="dosage"/>
+                                    <field name="forme_pharmaceutique"/>
+                                    <field name="conditionnement"/>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour ouvrir la liste des molécules -->
+    <record id="action_molecule" model="ir.actions.act_window">
+        <field name="name">Molécules</field>
+        <field name="res_model">dynamed.molecule</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

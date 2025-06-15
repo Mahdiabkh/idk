@@ -1,0 +1,45 @@
+<odoo>
+    <!-- Vue formulaire des noms commerciaux -->
+    <record id="view_nom_commercial_form" model="ir.ui.view">
+        <field name="name">nom.commercial.form</field>
+        <field name="model">nom.commercial</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="molecule_id"/>
+                        </group>
+                        <group>
+                            <field name="dosage"/>
+                            <field name="forme_pharmaceutique"/>
+                            <field name="conditionnement"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Vue liste des noms commerciaux -->
+    <record id="view_nom_commercial_tree" model="ir.ui.view">
+        <field name="name">nom.commercial.tree</field>
+        <field name="model">nom.commercial</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="molecule_id" widget="many2one_clickable"/>
+                <field name="dosage"/>
+                <field name="forme_pharmaceutique"/>
+                <field name="conditionnement"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Action pour ouvrir la vue des noms commerciaux -->
+    <record id="action_nom_commercial" model="ir.actions.act_window">
+        <field name="name">Noms Commerciaux</field>
+        <field name="res_model">nom.commercial</field>
+        <field name="view_mode">tree,form</field>
+
+    </record>
+</odoo>

@@ -1,0 +1,65 @@
+<odoo>
+    <record id="view_prescription_form" model="ir.ui.view">
+        <field name="name">dynamed.prescription.form</field>
+        <field name="model">dynamed.prescription</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <header>
+                        <!-- Bouton pour imprimer le rapport -->
+                        <button string="Imprimer Ordonnance" type="object" name="action_print_prescription"
+                                class="btn-primary"/>
+                    </header>
+                    <group>
+                        <field name="consultation_id" readonly="1"/>
+                        <field name="valid_molecules" invisible="1"/>
+                        <!-- Informations du médecin -->
+                        <group string="Informations du Médecin">
+                            <field name="medecin_name" readonly="1"/>
+                            <field name="medecin_specialite" readonly="1"/>
+                            <field name="medecin_phone" readonly="1"/>
+                            <field name="medecin_email" readonly="1"/>
+                        </group>
+
+
+                        <!-- Informations du patient -->
+                        <group string="Informations du Patient">
+                            <field name="patient_name" readonly="1"/>
+                            <field name="patient_age" readonly="1"/>
+                            <field name="patient_sexe" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="molecule_line_ids">
+                        <tree editable="bottom" create="true">
+                            <field name="molecule_id"
+                                   options="{'always_reload': True}"
+                                   context="{'search_default_filter_valid': 1}"/>
+                            <field name="commercial_name_id"
+                                   widget="many2one"
+                                   options="{'always_reload': True}"
+                                   domain="[('molecule_id','=',molecule_id)]"/>
+                            <field name="dosage" readonly="1"/>
+                            <field name="forme" readonly="1"/>
+                            <field name="conditionnement" readonly="1"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_prescription_tree" model="ir.ui.view">
+        <field name="name">dynamed.prescription.tree</field>
+        <field name="model">dynamed.prescription</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="consultation_id"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_prescription_list" model="ir.actions.act_window">
+        <field name="name">Ordonnances</field>
+        <field name="res_model">dynamed.prescription</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

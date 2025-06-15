@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+
+   <!-- Template QWeb pour le rapport -->
+   <template id="prescription_report_template">
+       <t t-call="web.html_container">
+           <t t-call="web.internal_layout">
+               <div class="page">
+                   <!-- Informations du médecin -->
+                   <h2>Informations du Médecin</h2>
+                   <p>
+                       <strong>Nom :</strong>
+                       <span t-field="docs.medecin_name"/>
+                   </p>
+                   <p>
+                       <strong>Téléphone :</strong>
+                       <span t-field="docs.medecin_phone"/>
+                   </p>
+                   <p>
+                       <strong>Email :</strong>
+                       <span t-field="docs.medecin_email"/>
+                   </p>
+
+
+                   <!-- Informations du patient -->
+                   <h2>Informations du Patient</h2>
+                   <p>
+                       <strong>Nom :</strong>
+                       <span t-field="docs.patient_name"/>
+                   </p>
+                   <p>
+                       <strong>Type de patient :</strong>
+                       <span t-field="docs.patient_age"/>
+                   </p>
+
+
+
+
+                   <!-- Médicaments recommandés -->
+                   <h2>Médicaments Recommandés</h2>
+                   <table class="table table-bordered">
+                       <thead>
+                           <tr>
+                               <th>Médicament</th>
+                           </tr>
+                       </thead>
+                       <tbody>
+                           <t t-foreach="docs.valid_molecules" t-as="molecule">
+                               <tr>
+                                   <td>
+                                       <span t-field="molecule.name"/>
+                                   </td>
+                               </tr>
+                           </t>
+                       </tbody>
+                   </table>
+               </div>
+           </t>
+       </t>
+   </template>
+
+
+   <record id="action_prescription_report" model="ir.actions.report">
+       <field name="name">Ordonnance Médicale</field>
+       <field name="model">dynamed.prescription</field>
+       <field name="report_type">qweb-pdf</field>
+       <field name="report_name">dynamed.prescription_report_template</field>
+       <field name="report_file">dynamed.prescription_report_template</field>
+       <field name="paperformat_id" ref="base.paperformat_euro"/>
+   </record>
+</odoo>

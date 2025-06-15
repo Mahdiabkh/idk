@@ -1,0 +1,53 @@
+{
+    'name': 'DynaMed',
+    'version': '1.0',
+    'summary': 'Module de gestion des patients, médecins, cliniques et consultations',
+    'description': 'Module pour gérer les patients, médecins, cliniques et consultations',
+    'author': 'Votre Nom',
+    'sequence': '-2',
+    'depends': ['base', 'web','mail', 'website', 'board'],
+    'data': [
+
+        'security/groups.xml',
+        'security/ir.model.access.csv',
+        'security/record_rules.xml',
+
+        'data/ir_cron.xml',
+        'data/mail_trial_templates.xml',
+        'data/mail_confirm_payment.xml',
+        'data/mail_payment_rejected_template.xml',
+        #'data/mail_channel_data.xml',
+
+        'wizard/payment_rejected_wizard.xml',
+
+        'data/dynamed_dataset_default_data.xml',
+        'report/prescription_report.xml',
+        'views/prescription_views.xml',
+        'views/correspondance_medicale_views.xml',
+        'views/nom_commercial_views.xml',
+        'views/interaction.xml',
+        'views/precaution_views.xml',
+        'views/patient_views.xml',
+        'views/medecin_views.xml',
+        'views/clinique_views.xml',
+        'views/consultation_views.xml',
+        'views/indications_views.xml',
+        'views/allergies_views.xml',
+        'views/medicaments_actuels_views.xml',
+        'views/antecedents_medicaux_views.xml',
+        'views/categorie_age.xml',
+        'views/specialite_views.xml',
+        'views/demande_inscription_views.xml',
+        'views/website_inscription_template.xml',
+        'views/website_payment_template.xml',
+        'views/molecule_views.xml',
+        'views/dataset_views.xml',
+        #'views/dynamed_dashboard.xml',
+        'views/menu_items.xml',
+    ],
+
+    'installable': True,
+    'application': True,
+
+    'images': ['dynamed/static/description/icon.png'],
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="ir_cron_check_trial_expiration" model="ir.cron">
+        <field name="name">Verifier l'expiration de periode d'essaie medecin</field>
+        <field name="model_id" ref="model_dynamed_inscription_medecin"/>
+        <field name="state">code</field>
+        <field name="code">model.check_trial_expiration()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>  <!-- Correct -->
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+    </record>
+
+</odoo>

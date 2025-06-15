@@ -1,0 +1,97 @@
+<odoo>
+    <record id="view_patient_tree" model="ir.ui.view">
+        <field name="name">dynamed.patient.tree</field>
+        <field name="model">dynamed.patient</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="age"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="sexe"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_patient_form" model="ir.ui.view">
+        <field name="name">dynamed.patient.form</field>
+        <field name="model">dynamed.patient</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="age"/>
+                        <field name="sexe" required="1"/>
+                        <field name="phone" invisible="1" />
+                        <field name="email" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <!-- Pivot View for Patients -->
+    <record id="view_patient_pivot" model="ir.ui.view">
+        <field name="name">dynamed.patient.pivot</field>
+        <field name="model">dynamed.patient</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="sexe" type="row"/>  <!-- Group by gender -->
+                <field name="age_group" type="col"/>  <!-- Uses the new age groups -->
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Graph View for Patients (Bar Chart) -->
+    <record id="view_patient_graph" model="ir.ui.view">
+        <field name="name">dynamed.patient.graph</field>
+        <field name="model">dynamed.patient</field>
+        <field name="arch" type="xml">
+            <graph type="bar">
+                <field name="sexe" type="row"/>  <!-- X-axis: Gender -->
+                <field name="age_group" type="col"/>  <!-- Uses the new age groups -->
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_patient_search" model="ir.ui.view">
+        <field name="name">dynamed.patient.search</field>
+        <field name="model">dynamed.patient</field>
+        <field name="arch" type="xml">
+            <search>
+                <!-- Champs de recherche de base -->
+                <field name="name" string="Nom du Patient"/>
+                <field name="phone" string="Téléphone"/>
+                <field name="sexe" string="Sexe"/>
+
+                <!-- Filtres -->
+                <filter name="filter_age_0_10" string="Âge 0-10"
+                        domain="[('age', '&gt;=', 0), ('age', '&lt;=', 10)]"/>
+                <filter name="filter_age_11_18" string="Âge 11-18"
+                        domain="[('age', '&gt;=', 11), ('age', '&lt;=', 18)]"/>
+                <filter name="filter_female" string="Femme"
+                        domain="[('sexe', '=', 'femme')]"/>
+                <filter name="filter_male" string="Homme"
+                        domain="[('sexe', '=', 'homme')]"/>
+
+                <!-- Options de Regroupement -->
+                <group expand="1" string="Regrouper Par">
+                    <filter name="group_by_gender" string="Sexe" context="{'group_by': 'sexe'}"/>
+                    <filter name="group_by_age_group" string="Groupe d'Âge" context="{'group_by': 'age_group'}"/>
+                    <filter name="group_by_create_date" string="Date d'Inscription (Année)"
+                            context="{'group_by': 'create_date:year'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Update the existing action to include Pivot & Graph views -->
+    <record id="action_patient" model="ir.actions.act_window">
+        <field name="name">Patients</field>
+        <field name="res_model">dynamed.patient</field>
+        <field name="view_mode">tree,form,pivot,graph</field>  <!-- Added pivot & graph -->
+        <field name="view_id" ref="view_patient_tree"/>  <!-- Default tree view -->
+    </record>
+</odoo>

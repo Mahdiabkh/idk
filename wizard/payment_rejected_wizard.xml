@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_payment_rejection_wizard_form" model="ir.ui.view">
+    <field name="name">payment.rejection.wizard.form</field>
+    <field name="model">payment.rejection.wizard</field>
+    <field name="arch" type="xml">
+        <form>
+                <field name="inscription_id" invisible="1"/>
+                <field name="rejection_reason" string="Raison de rejet" placeholder="Veuillez spécifier la raison du rejet..." nolabel="1"/>
+            <footer>
+                <button name="action_confirm_rejection" string="Envoyer l'email pour demander un nouvelle preuve de paiement" type="object" class="btn-danger"/>
+                <button string="Annuler" special="cancel" class="btn-secondary"/>
+            </footer>
+        </form>
+    </field>
+</record>
+</odoo>

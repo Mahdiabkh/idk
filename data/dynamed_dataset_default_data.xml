@@ -1,0 +1,17 @@
+<odoo noupdate="1">
+     <record id="dataset_1" model="dynamed.dataset">
+        <field name="name">Diagnostic</field>
+    </record>
+    <record id="dataset_2" model="dynamed.dataset">
+        <field name="name">Noms commerciaux</field>
+    </record>
+    <record id="dataset_3" model="dynamed.dataset">
+        <field name="name">Details</field>
+    </record>
+    <record id="dataset_4" model="dynamed.dataset">
+        <field name="name">Interaction</field>
+    </record>
+    <record id="dataset_5" model="dynamed.dataset">
+        <field name="name">Précautions</field>
+    </record>
+</odoo>

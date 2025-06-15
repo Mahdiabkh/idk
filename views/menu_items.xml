@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <menuitem id="dynamed_root" name="Dynamed"
+              web_icon="dynamed,static/description/icon.png"
+    />
+
+     <!-- Menu pour accéder au tableau de bord -->
+    <!-- Add to More menu -->
+    <!-- <menuitem id="menu_dynamed_dashboard"
+              name="Medical Dashboard"
+              action="action_board_my_dashboards"
+              parent="dynamed_root"
+              sequence="10"/>-->
+
+    <menuitem id="menu_configuration" name="Configuration" parent="dynamed_root"/>
+
+    <menuitem id="menu_allergies" name="Allergies" parent="menu_configuration" action="action_allergies"/>
+    <menuitem id="menu_medicament_actuels" name="Médicaments Actuels" parent="menu_configuration"
+              action="action_current_medication"/>
+    <menuitem id="menu_antecedents_medicaux" name="Antécédents Medicaux" parent="menu_configuration"
+              action="action_medical_history"/>
+    <menuitem id="menu_categories_age" name="Catégories d'âge" parent="menu_configuration"
+              action="action_age_category"/>
+    <menuitem id="menu_molecule" name="Molécule" parent="menu_configuration" action="action_molecule"/>
+    <menuitem
+            id="menu_medical_classe"
+            name="Classes Médicales"
+            parent="menu_configuration"
+            action="action_classe_medicale"
+
+    />
+
+    <menuitem
+            id="menu_diagnostic"
+            parent="menu_configuration"
+            name="Diagnostics"
+            action="action_diagnostic"
+
+    />
+    <menuitem id="menu_nom_commercial_main"
+          name="Noms Commerciaux"
+          action="action_nom_commercial"
+          parent="menu_configuration"/>
+    <menuitem id="menu_interaction_main"
+          name="Interactions"
+          action="action_interaction"
+          parent="menu_configuration"/>
+    <menuitem id="menu_precaution_main"
+          name="Précautions"
+          action="action_precaution"
+          parent="menu_configuration"/>
+
+
+    <menuitem id="menu_consultation" name="Consultations" parent="dynamed_root" action="action_consultation" sequence="0"/>
+    <menuitem id="menu_patient" name="Patients" parent="dynamed_root" action="action_patient"/>
+    <menuitem id="menu_clinique" name="Cliniques" parent="dynamed_root" action="action_clinique"
+              groups="dynamed.group_dynamed_admin"/>
+    <menuitem id="menu_indications" name="Indications" parent="menu_configuration" action="action_indications"/>
+    <menuitem id="menu_dataset" name="DataSets" parent="dynamed_root" action="action_dataset"
+              groups="dynamed.group_dynamed_admin"/>
+
+
+    <menuitem id="menu_gestion_medecins" name="Gestion des medecins" parent="dynamed_root" sequence="10"
+              groups="dynamed.group_dynamed_admin"/>
+    <menuitem id="menu_specialités" name="Spécialités" parent="menu_gestion_medecins" action="action_specialite"/>
+    <menuitem id="menu_medecin" name="Médecins" parent="menu_gestion_medecins" action="action_medecin"/>
+    <menuitem id="menu_inscriptions" name="Demandes d'inscriptions" parent="menu_gestion_medecins"
+              action="action_inscription_medecin"/>
+
+
+</odoo>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="inscription_medecin_form" name="Inscription Médecin">
+        <t t-call="website.layout">
+            <div class="container">
+                <h1>Inscription Médecin</h1>
+                <form action="/inscription/medecin/submit" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="name">Nom complet *</label>
+                        <input type="text" class="form-control" id="name" name="name" required="required"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Numéro de téléphone</label>
+                        <input type="text" class="form-control" id="phone" name="phone"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" class="form-control" id="email" name="email" required="required"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="type_pratique">Type de pratique</label>
+                        <select class="form-control" id="type_pratique" name="type_pratique">
+                            <option value="prive">Privé</option>
+                            <option value="public">Public</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="specialite_id">Spécialité</label>
+                        <select class="form-control" id="specialite_id" name="specialite_id">
+                            <t t-foreach="request.env['dynamed.specialite'].search([])" t-as="specialite">
+                                <option t-att-value="specialite.id" t-esc="specialite.name"/>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="preuve_paiement">Preuve de paiement</label>
+                        <input type="file" class="form-control" id="preuve_paiement" name="preuve_paiement"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Soumettre</button>
+                </form>
+            </div>
+        </t>
+    </template>
+    <template id="inscription_success_template" name="Inscription Success">
+        <t t-call="website.layout">
+            <div class="container">
+                <h1>Merci pour votre inscription!</h1>
+                <p>Votre demande d'inscription a été soumise avec succès. Nous vous contacterons bientôt.</p>
+            </div>
+        </t>
+    </template>
+</odoo>

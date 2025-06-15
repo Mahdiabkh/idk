@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_dynamed_dashboard" model="ir.ui.view">
+        <field name="name">dynamed.dashboard</field>
+        <field name="model">board.board</field>
+        <field name="arch" type="xml">
+            <board>
+                <column>
+                    <!-- KPI Card 1 -->
+                    <action context="{'dashboard_merge_domains_contexts': True}"
+                            string="Active Doctors"
+                            name="action_dynamed_medecin"
+                            view_mode="kanban"
+                            domain="[('active', '=', True)]"/>
+
+                    <!-- KPI Card 2 -->
+                    <action context="{'dashboard_merge_domains_contexts': True}"
+                            string="Trial Doctors"
+                            name="action_dynamed_medecin"
+                            view_mode="kanban"
+                            domain="[('en_essai', '=', True)]"/>
+                </column>
+                <column>
+                    <!-- Chart Section -->
+                    <div class="oe_dashboard_graph">
+                        <field name="consultation_chart" widget="graph"/>
+                    </div>
+                </column>
+            </board>
+        </field>
+    </record>
+
+
+</odoo>
+

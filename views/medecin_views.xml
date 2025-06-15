@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<odoo>
+    <record id="view_medecin_tree" model="ir.ui.view">
+        <field name="name">dynamed.medecin.tree</field>
+        <field name="model">dynamed.medecin</field>
+        <field name="arch" type="xml">
+            <tree create="false">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="type_pratique"/>
+                <field name="specialite_id"/>
+                <field name="nombre_ordonnances" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_medecin_form" model="ir.ui.view">
+        <field name="name">dynamed.medecin.form</field>
+        <field name="model">dynamed.medecin</field>
+        <field name="arch" type="xml">
+            <form create="false">
+
+                <sheet>
+                    <!-- Smart Button for Associated User -->
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="open_user" icon="fa-user">
+                            <field string="Utilisateur" name="user_id" widget="statinfo"/>
+                        </button>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="type_pratique"/>
+                            <field name="specialite_id"/>
+                            <field name="en_essai"/>
+                            <field name="date_fin_essai"/>
+                            <field name="est_suspendu"/>
+                            <field name="nombre_ordonnances" readonly="1"/>
+
+                        </group>
+                        <group>
+                            <field name="phone"/>
+                            <field name="email"/>
+
+                        </group>
+
+                    </group>
+                    <notebook>
+                        <page string="Preuve de paiment">
+                            <field name="preuve_paiement"/>
+
+                        </page>
+                        <page string="consultations">
+                            <field name="consultation_ids">
+                                <tree>
+                                    <field name = "date_consultation"/>
+                                    <field name = "patient_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_medecin" model="ir.actions.act_window">
+        <field name="name">Médecins</field>
+        <field name="res_model">dynamed.medecin</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

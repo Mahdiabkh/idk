@@ -1,0 +1,36 @@
+<odoo>
+    <!-- Vue formulaire des noms commerciaux -->
+    <record id="view_interaction_form" model="ir.ui.view">
+        <field name="name">interaction.form</field>
+        <field name="model">dynamed.interaction</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="medicament_1_id"/>
+                        <field name="medicament_2_id"/>
+                        <field name="classe_medicale_id"/>
+                        <field name="type_interaction"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>    <!-- Vue liste des noms commerciaux -->
+    <record id="view_interaction_tree" model="ir.ui.view">
+        <field name="name">interaction.tree</field>
+        <field name="model">dynamed.interaction</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="medicament_1_id"/>
+                <field name="medicament_2_id"/>
+                <field name="type_interaction"/>
+                <field name="classe_medicale_id"/>
+            </tree>
+        </field>
+    </record>    <!-- Action pour ouvrir la vue des noms commerciaux -->
+    <record id="action_interaction" model="ir.actions.act_window">
+        <field name="name">Interactions Médicamenteuses</field>
+        <field name="res_model">dynamed.interaction</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

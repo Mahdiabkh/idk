@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+
+    <record id="view_inscription_medecin_tree" model="ir.ui.view">
+        <field name="name">dynamed.inscription.medecin.tree</field>
+        <field name="model">dynamed.inscription.medecin</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="type_pratique"/>
+                <field name="specialite_id"/>
+                <field name="statut"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_inscription_medecin_form" model="ir.ui.view">
+        <field name="name">dynamed.inscription.medecin.form</field>
+        <field name="model">dynamed.inscription.medecin</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="statut" widget="statusbar" clickable="1"/>
+                    <!-- Approve Button -->
+                    <button name="action_approve" string="Approuver" type="object"
+                            class="btn-success" invisible="statut != 'en_attente'"/>
+                    <!-- Reject Button -->
+                    <button name="action_reject" string="Rejeter" type="object"
+                            class="btn-danger" invisible="statut != 'en_attente'"/>
+                    <!-- Validate Payment Button -->
+                    <button name="action_valider_payment" string="Valider Paiement" type="object"
+                            class="btn-primary" invisible="statut != 'paiement_attente' or payment_valide"/>
+
+                    <button name="action_reject_payment" string="Paiement non valide" type="object" class="btn-danger"
+                            invisible="statut != 'paiement_attente' "/>
+
+                    <!-- Create Doctor Button -->
+                    <button name="action_create_medecin" string="Créer Médecin" type="object"
+                            class="btn-primary" invisible="statut != 'approuve' or medecin_id"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <!-- Smart Button to Link to the Created Medecin -->
+                        <button class="oe_stat_button" type="object" name="open_medecin" icon="fa-user-md"
+                                invisible="medecin_id  == False">
+                            <field string="Médecin" name="medecin_id" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="type_pratique"/>
+                            <field name="specialite_id"/>
+                            <field name="phone"/>
+                            <field name="email"/>
+                        </group>
+
+                        <group>
+                            <field name="date_fin_essai"/>
+                            <field name="est_suspendu"/>
+                            <field name="payment_valide"/>
+                        </group>
+
+
+                    </group>
+                    <notebook>
+                        <page string="Preuve de paiement">
+                            <field name="preuve_paiement" widget="image" style="max-height: 700px; max-width: 800px;"/>
+                        </page>
+                    </notebook>
+                     <div class="oe_chatter">
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Add filter for trial doctors -->
+    <record id="view_inscription_medecin_search" model="ir.ui.view">
+        <field name="name">dynamed.inscription.medecin.search</field>
+        <field name="model">dynamed.inscription.medecin</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="statut"/>
+                <filter string="En attente" name="en_attente" domain="[('statut','=','en_attente')]"/>
+                <filter string="En essai" name="en_essai" domain="[('statut','=','essai')]"/>
+                <filter string="Suspendus" name="suspendus" domain="[('est_suspendu','=',True)]"/>
+                <filter string="Approuvés" name="approuves" domain="[('statut','=','medecin_cree')]"/>
+                <filter string="Aujourd'hui" name="today" domain="[('date_fin_essai','=',context_today())]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_inscription_medecin" model="ir.actions.act_window">
+        <field name="name">Demandes d'inscription</field>
+        <field name="res_model">dynamed.inscription.medecin</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_en_attente': 1}</field>
+
+    </record>
+</odoo>
