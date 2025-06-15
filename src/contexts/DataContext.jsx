@@ -48,11 +48,7 @@ export const DataProvider = ({ children }) => {
   // Update derived data when molecules change
   useEffect(() => {
     if (molecules.length > 0) {
-      // Extract unique diagnostics from molecules
-      const uniqueDiagnostics = getUniqueValuesFromMolecules('indications_ids')
-      if (uniqueDiagnostics.length > 0 && diagnostics.length === 0) {
-        setDiagnostics(uniqueDiagnostics)
-      }
+      
 
       // Extract unique allergies from molecules
       const uniqueAllergies = getUniqueValuesFromMolecules('allergies_ids')
@@ -72,11 +68,7 @@ export const DataProvider = ({ children }) => {
         setAntecedentsMedicaux(uniqueAntecedents)
       }
 
-      // Extract unique precautions from molecules
-      const uniquePrecautions = getUniqueValuesFromMolecules('precaution_ids')
-      if (uniquePrecautions.length > 0 && precautions.length === 0) {
-        setPrecautions(uniquePrecautions)
-      }
+     
 
       // Extract unique medical classes from molecules
       const uniqueMedicalClasses = getUniqueValuesFromMolecules('classes_medicales_ids')
