@@ -14,43 +14,47 @@ class DataSet(models.Model):
     file = fields.Binary(string='Fichier CSV', required=True)
     file_name = fields.Char(string='Nom du fichier')
 
-    def _split_values(self, text):
-        """
-        Fonction pour séparer les valeurs selon différents séparateurs
-        RÈGLE IMPORTANTE: Ne pas séparer les virgules/slashes à l'intérieur des parenthèses
-        """
-        if not text:
-            return []
+   def _split_values(self, text):
+    """
+    Fonction pour séparer les valeurs selon différents séparateurs
+    RÈGLE IMPORTANTE: Ne pas séparer les virgules, slashes ou tirets à l'intérieur des parenthèses
+    """
+    if not text:
+        return []
 
-        # Fonction pour protéger le contenu entre parenthèses
-        def protect_parentheses_content(match):
-            content = match.group(1)
-            # Remplacer temporairement les séparateurs dans les parenthèses
-            content = content.replace(',', '§COMMA§')
-            content = content.replace('/', '§SLASH§')
-            content = content.replace('-', '§DASH§')
-            return f"({content})"
+    # Fonction pour protéger le contenu entre parenthèses
+    def protect_parentheses_content(match):
+        content = match.group(1)
+        # Remplacer temporairement les séparateurs dans les parenthèses
+        content = content.replace(',', '§COMMA§')
+        content = content.replace('/', '§SLASH§')
+        content = content.replace('-', '§DASH§')
+        return f"({content})"
 
-        # Protéger le contenu entre parenthèses
-        protected_text = re.sub(r'\(([^)]+)\)', protect_parentheses_content, text.strip())
-        
-        # Normaliser les séparateurs - traiter les tirets comme des séparateurs seulement s'ils sont précédés/suivis d'espaces
-        # Remplacer les virgules et les tirets entourés d'espaces par des pipes
-        normalized_text = re.sub(r'\s*,\s*|\s+-\s+', '|', protected_text)
-        
-        # Séparer par le pipe
-        values = [v.strip() for v in normalized_text.split('|') if v.strip()]
-        
-        # Restaurer le contenu protégé
-        restored_values = []
-        for value in values:
-            restored_value = value.replace('§COMMA§', ',').replace('§SLASH§', '/').replace('§DASH§', '-')
-            # Nettoyer les tirets en début de ligne (puces)
-            restored_value = re.sub(r'^-\s*', '', restored_value.strip())
-            if restored_value:  # Ajouter seulement si non vide après nettoyage
-                restored_values.append(restored_value)
-        
-        return restored_values
+    # Protéger le contenu entre parenthèses
+    protected_text = re.sub(r'\(([^)]+)\)', protect_parentheses_content, text.strip())
+    
+    # Remplacer toutes les virgules, slashes, ou tirets par des pipes (séparateurs)
+    normalized_text = re.sub(r'\s*[,\-/]\s*', '|', protected_text)
+    
+    # Séparer les valeurs
+    values = [v.strip() for v in normalized_text.split('|') if v.strip()]
+    
+    # Restaurer le contenu protégé
+    restored_values = []
+    for value in values:
+        restored_value = (
+            value.replace('§COMMA§', ',')
+                 .replace('§SLASH§', '/')
+                 .replace('§DASH§', '-')
+        )
+        # Nettoyer les tirets en début de ligne (ex: puces)
+        restored_value = re.sub(r'^-\s*', '', restored_value.strip())
+        if restored_value:
+            restored_values.append(restored_value)
+    
+    return restored_values
+
 
     def import_molecules_data(self):
         """Méthode principale pour l'importation des molécules"""
