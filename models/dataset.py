@@ -34,8 +34,9 @@ class DataSet(models.Model):
         # Protéger le contenu entre parenthèses
         protected_text = re.sub(r'\(([^)]+)\)', protect_parentheses_content, text.strip())
         
-        # Normaliser les séparateurs (remplacer les tirets par des virgules)
-        normalized_text = re.sub(r'(\s*-\s*|\s*,\s*|\s*/\s*)', '|', protected_text)
+        # Normaliser les séparateurs - traiter les tirets comme des séparateurs seulement s'ils sont précédés/suivis d'espaces
+        # Remplacer les virgules et les tirets entourés d'espaces par des pipes
+        normalized_text = re.sub(r'\s*,\s*|\s+-\s+', '|', protected_text)
         
         # Séparer par le pipe
         values = [v.strip() for v in normalized_text.split('|') if v.strip()]
@@ -44,7 +45,10 @@ class DataSet(models.Model):
         restored_values = []
         for value in values:
             restored_value = value.replace('§COMMA§', ',').replace('§SLASH§', '/').replace('§DASH§', '-')
-            restored_values.append(restored_value)
+            # Nettoyer les tirets en début de ligne (puces)
+            restored_value = re.sub(r'^-\s*', '', restored_value.strip())
+            if restored_value:  # Ajouter seulement si non vide après nettoyage
+                restored_values.append(restored_value)
         
         return restored_values
 
@@ -78,60 +82,61 @@ class DataSet(models.Model):
                 if not molecule_name_field:
                     continue
 
-                # Vérifier si c'est vraiment un nom de molécule et non une indication/précaution
-                if self._is_valid_molecule_name(molecule_name_field):
-                    # Éviter les doublons
-                    if molecule_name_field in processed_molecule_names:
-                        continue
-                    
-                    processed_molecule_names.add(molecule_name_field)
+                # Éviter les doublons
+                if molecule_name_field in processed_molecule_names:
+                    continue
+                
+                processed_molecule_names.add(molecule_name_field)
 
-                    # Gestion de la molécule de base
-                    molecule = models['molecule'].search([('name', '=', molecule_name_field)], limit=1)
+                # Gestion de la molécule de base
+                molecule = models['molecule'].search([('name', '=', molecule_name_field)], limit=1)
 
-                    vals = {
-                        'name': molecule_name_field,
-                        'grossesse': row.get('Grossesse', '').strip().upper() == 'TRUE',
-                        'allaitement': row.get('Allaitement', '').strip().upper() == 'TRUE',
-                        'effet_majeurs': row.get('Effets secondaires majeurs', '').strip(),
-                    }
+                vals = {
+                    'name': molecule_name_field,
+                    'grossesse': row.get('Grossesse', '').strip().upper() == 'TRUE',
+                    'allaitement': row.get('Allaitement', '').strip().upper() == 'TRUE',
+                    'effet_majeurs': row.get('Effets secondaires majeurs', '').strip(),
+                }
 
-                    if not molecule:
-                        molecule = models['molecule'].create(vals)
-                        imported_molecules_count += 1
-                    else:
-                        molecule.write(vals)
+                if not molecule:
+                    molecule = models['molecule'].create(vals)
+                    imported_molecules_count += 1
+                else:
+                    molecule.write(vals)
 
-                    # Mapping corrigé pour utiliser le bon nom de champ
-                    mapping = {
-                        'Classes thérapeutiques': ('classes_medicales_ids', 'classe_medicale'),
-                        'Allergies': ('allergies_ids', 'allergies'),
-                        'Antécédents médicaux': ('antecedents_medicaux_ids', 'antecedents'),
-                        'Catégories d\'âge': ('categories_age_id', 'age'),
-                        'Indications principales': ('indications_ids', 'indications'),
-                        'Précautions': ('precaution_ids', 'precaution')
-                    }
+                # Mapping pour les champs avec gestion améliorée
+                mapping = {
+                    'Classes thérapeutiques': ('classes_medicales_ids', 'classe_medicale'),
+                    'Allergies': ('allergies_ids', 'allergies'),
+                    'Antécédents médicaux': ('antecedents_medicaux_ids', 'antecedents'),
+                    'Catégories d\'âge': ('categories_age_id', 'age'),
+                    'Indications principales': ('indications_ids', 'indications'),
+                    'Précautions': ('precaution_ids', 'precaution')
+                }
 
-                    for col_name, (field_name, model_key) in mapping.items():
-                        if row.get(col_name):
-                            items = self._split_values(row[col_name])
-                            if field_name.endswith('_id'):  # Gestion spéciale pour les One2many
-                                if items:
-                                    item = models[model_key].search([('name', '=', items[0])], limit=1)
+                for col_name, (field_name, model_key) in mapping.items():
+                    col_value = row.get(col_name, '').strip()
+                    if col_value:
+                        items = self._split_values(col_value)
+                        
+                        if field_name.endswith('_id'):  # Gestion spéciale pour les One2many
+                            if items:
+                                item_name = items[0]
+                                if self._is_valid_field_value(item_name, model_key):
+                                    item = models[model_key].search([('name', '=', item_name)], limit=1)
                                     if not item:
-                                        item = models[model_key].create({'name': items[0]})
+                                        item = models[model_key].create({'name': item_name})
                                     molecule.write({field_name: item.id})
-                            else:
-                                item_ids = []
-                                for item_name in items:
-                                    # Filtrer les noms invalides
-                                    if self._is_valid_field_value(item_name, model_key):
-                                        item = models[model_key].search([('name', '=', item_name)], limit=1)
-                                        if not item:
-                                            item = models[model_key].create({'name': item_name})
-                                        item_ids.append(item.id)
-                                if item_ids:
-                                    molecule.write({field_name: [(6, 0, item_ids)]})
+                        else:  # Gestion pour les Many2many
+                            item_ids = []
+                            for item_name in items:
+                                if self._is_valid_field_value(item_name, model_key):
+                                    item = models[model_key].search([('name', '=', item_name)], limit=1)
+                                    if not item:
+                                        item = models[model_key].create({'name': item_name})
+                                    item_ids.append(item.id)
+                            if item_ids:
+                                molecule.write({field_name: [(6, 0, item_ids)]})
 
             return {
                 'type': 'ir.actions.client',
@@ -146,36 +151,6 @@ class DataSet(models.Model):
         except Exception as e:
             raise UserError(_("Erreur lors de l'importation : %s") % str(e))
 
-    def _is_valid_molecule_name(self, name):
-        """
-        Vérifier si le nom est un vrai nom de molécule
-        Exclure les termes qui sont clairement des indications ou précautions
-        """
-        if not name or len(name.strip()) < 2:
-            return False
-            
-        # Liste des termes qui ne sont PAS des noms de molécules
-        invalid_terms = {
-            'nausée', 'naussée', 'vomissement', 'douleur', 'fièvre', 'toux',
-            'infection', 'inflammation', 'allergie', 'hypertension', 'diabète',
-            'asthme', 'migraine', 'dépression', 'anxiété', 'insomnie',
-            'constipation', 'diarrhée', 'fatigue', 'vertiges', 'maux de tête',
-            'grossesse', 'allaitement', 'enfant', 'adulte', 'âgé',
-            'précaution', 'indication', 'contre-indication', 'effet secondaire'
-        }
-        
-        name_lower = name.lower().strip()
-        
-        # Vérifier si c'est dans la liste des termes invalides
-        if name_lower in invalid_terms:
-            return False
-            
-        # Vérifier si ça ressemble à une phrase (contient plusieurs mots avec des articles/prépositions)
-        if any(word in name_lower for word in ['de la', 'du', 'des', 'le ', 'la ', 'les ', 'en cas de', 'pour']):
-            return False
-            
-        return True
-
     def _is_valid_field_value(self, value, field_type):
         """
         Vérifier si la valeur est valide pour le type de champ donné
@@ -183,17 +158,23 @@ class DataSet(models.Model):
         if not value or len(value.strip()) < 2:
             return False
             
-        value_lower = value.lower().strip()
+        value_clean = value.strip()
         
-        # Pour les indications, accepter les termes médicaux
-        if field_type == 'indications':
-            return True  # Les indications peuvent être variées
+        # Exclure les valeurs vides ou trop courtes
+        if not value_clean or len(value_clean) < 2:
+            return False
             
-        # Pour les précautions, accepter les termes de précaution
-        if field_type == 'precaution':
-            return True  # Les précautions peuvent être variées
-            
-        # Pour les allergies, classes, etc.
+        # Exclure les valeurs qui sont clairement des erreurs de parsing
+        invalid_patterns = [
+            r'^-+$',  # Seulement des tirets
+            r'^\s*$',  # Seulement des espaces
+            r'^[,\-/]+$',  # Seulement des séparateurs
+        ]
+        
+        for pattern in invalid_patterns:
+            if re.match(pattern, value_clean):
+                return False
+                
         return True
 
     def import_precautions(self):
@@ -280,7 +261,7 @@ class DataSet(models.Model):
                 class_ids = []
 
                 for class_name in classes:
-                    if class_name:  # Vérifier que le nom n'est pas vide
+                    if class_name and self._is_valid_field_value(class_name, 'classe_medicale'):
                         classe = classe_model.search([('name', '=', class_name)], limit=1)
                         if not classe:
                             classe = classe_model.create({'name': class_name})
@@ -413,7 +394,7 @@ class DataSet(models.Model):
                 if row.get('Médicaments'):
                     med2_names = self._split_values(row['Médicaments'])
                     for med2_name in med2_names:
-                        if med2_name:  # Vérifier que le nom n'est pas vide
+                        if med2_name and self._is_valid_field_value(med2_name, 'molecule'):
                             med2_data = self._get_or_create_medicament(med2_name)
 
                             # Création interaction si elle n'existe pas
