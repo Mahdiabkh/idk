@@ -14,47 +14,46 @@ class DataSet(models.Model):
     file = fields.Binary(string='Fichier CSV', required=True)
     file_name = fields.Char(string='Nom du fichier')
 
-   def _split_values(self, text):
-    """
-    Fonction pour séparer les valeurs selon différents séparateurs
-    RÈGLE IMPORTANTE: Ne pas séparer les virgules, slashes ou tirets à l'intérieur des parenthèses
-    """
-    if not text:
-        return []
+    def _split_values(self, text):
+        """
+        Fonction pour séparer les valeurs selon différents séparateurs
+        RÈGLE IMPORTANTE: Ne pas séparer les virgules, slashes ou tirets à l'intérieur des parenthèses
+        """
+        if not text:
+            return []
 
-    # Fonction pour protéger le contenu entre parenthèses
-    def protect_parentheses_content(match):
-        content = match.group(1)
-        # Remplacer temporairement les séparateurs dans les parenthèses
-        content = content.replace(',', '§COMMA§')
-        content = content.replace('/', '§SLASH§')
-        content = content.replace('-', '§DASH§')
-        return f"({content})"
+        # Fonction pour protéger le contenu entre parenthèses
+        def protect_parentheses_content(match):
+            content = match.group(1)
+            # Remplacer temporairement les séparateurs dans les parenthèses
+            content = content.replace(',', '§COMMA§')
+            content = content.replace('/', '§SLASH§')
+            content = content.replace('-', '§DASH§')
+            return f"({content})"
 
-    # Protéger le contenu entre parenthèses
-    protected_text = re.sub(r'\(([^)]+)\)', protect_parentheses_content, text.strip())
-    
-    # Remplacer toutes les virgules, slashes, ou tirets par des pipes (séparateurs)
-    normalized_text = re.sub(r'\s*[,\-/]\s*', '|', protected_text)
-    
-    # Séparer les valeurs
-    values = [v.strip() for v in normalized_text.split('|') if v.strip()]
-    
-    # Restaurer le contenu protégé
-    restored_values = []
-    for value in values:
-        restored_value = (
-            value.replace('§COMMA§', ',')
-                 .replace('§SLASH§', '/')
-                 .replace('§DASH§', '-')
-        )
-        # Nettoyer les tirets en début de ligne (ex: puces)
-        restored_value = re.sub(r'^-\s*', '', restored_value.strip())
-        if restored_value:
-            restored_values.append(restored_value)
-    
-    return restored_values
-
+        # Protéger le contenu entre parenthèses
+        protected_text = re.sub(r'\(([^)]+)\)', protect_parentheses_content, text.strip())
+        
+        # Remplacer toutes les virgules, slashes, ou tirets par des pipes (séparateurs)
+        normalized_text = re.sub(r'\s*[,\-/]\s*', '|', protected_text)
+        
+        # Séparer les valeurs
+        values = [v.strip() for v in normalized_text.split('|') if v.strip()]
+        
+        # Restaurer le contenu protégé
+        restored_values = []
+        for value in values:
+            restored_value = (
+                value.replace('§COMMA§', ',')
+                     .replace('§SLASH§', '/')
+                     .replace('§DASH§', '-')
+            )
+            # Nettoyer les tirets en début de ligne (ex: puces)
+            restored_value = re.sub(r'^-\s*', '', restored_value.strip())
+            if restored_value:
+                restored_values.append(restored_value)
+        
+        return restored_values
 
     def import_molecules_data(self):
         """Méthode principale pour l'importation des molécules"""
@@ -92,68 +91,76 @@ class DataSet(models.Model):
                 
                 processed_molecule_names.add(molecule_name_field)
 
-                # Gestion de la molécule de base
-                molecule = models['molecule'].search([('name', '=', molecule_name_field)], limit=1)
-
-                vals = {
-                    'name': molecule_name_field,
-                    'grossesse': row.get('Grossesse', '').strip().upper() == 'TRUE',
-                    'allaitement': row.get('Allaitement', '').strip().upper() == 'TRUE',
-                    'effet_majeurs': row.get('Effets secondaires majeurs', '').strip(),
-                }
-
-                if not molecule:
+                # Vérifier si la molécule existe déjà
+                existing_molecule = models['molecule'].search([('name', '=', molecule_name_field)], limit=1)
+                
+                if existing_molecule:
+                    # Mettre à jour la molécule existante
+                    molecule = existing_molecule
+                else:
+                    # Créer une nouvelle molécule
+                    vals = {
+                        'name': molecule_name_field,
+                        'grossesse': row.get('Grossesse', '').strip().upper() == 'TRUE',
+                        'allaitement': row.get('Allaitement', '').strip().upper() == 'TRUE',
+                        'effet_majeurs': row.get('Effets secondaires majeurs', '').strip(),
+                    }
                     molecule = models['molecule'].create(vals)
                     imported_molecules_count += 1
-                else:
-                    molecule.write(vals)
 
-                # Mapping pour les champs avec gestion améliorée
-                mapping = {
-                    'Classes thérapeutiques': ('classes_medicales_ids', 'classe_medicale'),
-                    'Allergies': ('allergies_ids', 'allergies'),
-                    'Antécédents médicaux': ('antecedents_medicaux_ids', 'antecedents'),
-                    'Catégories d\'âge': ('categories_age_id', 'age'),
-                    'Indications principales': ('indications_ids', 'indications'),
-                    'Précautions': ('precaution_ids', 'precaution')
-                }
-
-                for col_name, (field_name, model_key) in mapping.items():
-                    col_value = row.get(col_name, '').strip()
-                    if col_value:
-                        items = self._split_values(col_value)
-                        
-                        if field_name.endswith('_id'):  # Gestion spéciale pour les One2many
-                            if items:
-                                item_name = items[0]
-                                if self._is_valid_field_value(item_name, model_key):
-                                    item = models[model_key].search([('name', '=', item_name)], limit=1)
-                                    if not item:
-                                        item = models[model_key].create({'name': item_name})
-                                    molecule.write({field_name: item.id})
-                        else:  # Gestion pour les Many2many
-                            item_ids = []
-                            for item_name in items:
-                                if self._is_valid_field_value(item_name, model_key):
-                                    item = models[model_key].search([('name', '=', item_name)], limit=1)
-                                    if not item:
-                                        item = models[model_key].create({'name': item_name})
-                                    item_ids.append(item.id)
-                            if item_ids:
-                                molecule.write({field_name: [(6, 0, item_ids)]})
+                # Traitement des relations Many2many et Many2one
+                self._process_molecule_relations(molecule, row, models)
 
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
                     'title': 'Succès',
-                    'message': f'{imported_molecules_count} molécules importées avec succès',
+                    'message': f'{imported_molecules_count} nouvelles molécules importées avec succès',
                     'sticky': False,
                 }
             }
 
         except Exception as e:
             raise UserError(_("Erreur lors de l'importation : %s") % str(e))
+
+    def _process_molecule_relations(self, molecule, row, models):
+        """Traite les relations Many2many et Many2one pour une molécule"""
+        
+        # Mapping pour les champs avec gestion améliorée
+        mapping = {
+            'Classes thérapeutiques': ('classes_medicales_ids', 'classe_medicale'),
+            'Allergies': ('allergies_ids', 'allergies'),
+            'Antécédents médicaux': ('antecedents_medicaux_ids', 'antecedents'),
+            'Catégories d\'âge': ('categories_age_id', 'age'),
+            'Indications principales': ('indications_ids', 'indications'),
+            'Précautions': ('precaution_ids', 'precaution')
+        }
+
+        for col_name, (field_name, model_key) in mapping.items():
+            col_value = row.get(col_name, '').strip()
+            if col_value:
+                items = self._split_values(col_value)
+                
+                if field_name.endswith('_id'):  # Gestion spéciale pour les Many2one
+                    if items:
+                        item_name = items[0]
+                        if self._is_valid_field_value(item_name, model_key):
+                            item = models[model_key].search([('name', '=', item_name)], limit=1)
+                            if not item:
+                                item = models[model_key].create({'name': item_name})
+                            molecule.write({field_name: item.id})
+                else:  # Gestion pour les Many2many
+                    item_ids = []
+                    for item_name in items:
+                        if self._is_valid_field_value(item_name, model_key):
+                            item = models[model_key].search([('name', '=', item_name)], limit=1)
+                            if not item:
+                                item = models[model_key].create({'name': item_name})
+                            item_ids.append(item.id)
+                    if item_ids:
+                        # Utiliser (6, 0, ids) pour remplacer complètement la relation
+                        molecule.write({field_name: [(6, 0, item_ids)]})
 
     def _is_valid_field_value(self, value, field_type):
         """
