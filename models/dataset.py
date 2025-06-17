@@ -65,7 +65,7 @@ class DataSet(models.Model):
         try:
             file_content = base64.b64decode(self.file).decode('utf-8')
             csv_file = StringIO(file_content)
-            reader = csv.DictReader(csv_file)
+            reader = csv.DictReader(csv_file, delimiter='\t')  # Using tab delimiter
 
             models = {
                 'molecule': self.env['dynamed.molecule'],
@@ -81,7 +81,14 @@ class DataSet(models.Model):
             processed_molecule_names = set()  # Pour éviter les doublons
 
             for row in reader:
-                molecule_name_field = row.get('Nom de la molécule', '').strip()
+                # Debug: Print the first row to see column names
+                if imported_molecules_count == 0:
+                    print("CSV Headers:", list(row.keys()))
+                    print("First row data:", row)
+                
+                # Get molecule name from first column (index 0)
+                molecule_name_field = list(row.values())[0].strip() if row else ''
+                
                 if not molecule_name_field:
                     continue
 
@@ -99,17 +106,20 @@ class DataSet(models.Model):
                     molecule = existing_molecule
                 else:
                     # Créer une nouvelle molécule
+                    # Based on your CSV structure: Acarbose	- Diabète de type 2	Antidiabétique , inhibiteur des alpha-glucosidases	Hypersensibilité	Insuffisance rénale		Adulte	TRUE	TRUE	"- Insuffisance rénale\n- Grossesse et allaitement"	"- Flatulence\n- Diarrhée\n- Douleurs abdominales"
+                    row_values = list(row.values())
+                    
                     vals = {
                         'name': molecule_name_field,
-                        'grossesse': row.get('Grossesse', '').strip().upper() == 'TRUE',
-                        'allaitement': row.get('Allaitement', '').strip().upper() == 'TRUE',
-                        'effet_majeurs': row.get('Effets secondaires majeurs', '').strip(),
+                        'grossesse': row_values[7].strip().upper() == 'TRUE' if len(row_values) > 7 else False,  # Column 8
+                        'allaitement': row_values[8].strip().upper() == 'TRUE' if len(row_values) > 8 else False,  # Column 9
+                        'effet_majeurs': row_values[10].strip() if len(row_values) > 10 else '',  # Column 11 (last column)
                     }
                     molecule = models['molecule'].create(vals)
                     imported_molecules_count += 1
 
                 # Traitement des relations Many2many et Many2one
-                self._process_molecule_relations(molecule, row, models)
+                self._process_molecule_relations_by_position(molecule, row_values, models)
 
             return {
                 'type': 'ir.actions.client',
@@ -123,6 +133,58 @@ class DataSet(models.Model):
 
         except Exception as e:
             raise UserError(_("Erreur lors de l'importation : %s") % str(e))
+
+    def _process_molecule_relations_by_position(self, molecule, row_values, models):
+        """Traite les relations Many2many et Many2one pour une molécule basé sur la position des colonnes"""
+        
+        # Based on your CSV structure:
+        # 0: Molecule name
+        # 1: Indications principales  
+        # 2: Classes thérapeutiques
+        # 3: Allergies
+        # 4: Antécédents médicaux
+        # 5: Médicaments actuels (empty in your example)
+        # 6: Catégories d'âge
+        # 7: Grossesse
+        # 8: Allaitement  
+        # 9: Précautions
+        # 10: Effets secondaires majeurs
+        
+        # Mapping par position de colonne
+        position_mapping = {
+            1: ('indications_ids', 'indications'),           # Indications principales
+            2: ('classes_medicales_ids', 'classe_medicale'), # Classes thérapeutiques
+            3: ('allergies_ids', 'allergies'),               # Allergies
+            4: ('antecedents_medicaux_ids', 'antecedents'),  # Antécédents médicaux
+            6: ('categories_age_id', 'age'),                 # Catégories d'âge (Many2one)
+            9: ('precaution_ids', 'precaution')             # Précautions
+        }
+
+        for position, (field_name, model_key) in position_mapping.items():
+            if position < len(row_values):
+                col_value = row_values[position].strip()
+                if col_value:
+                    items = self._split_values(col_value)
+                    
+                    if field_name.endswith('_id') and not field_name.endswith('_ids'):  # Many2one
+                        if items:
+                            item_name = items[0]
+                            if self._is_valid_field_value(item_name, model_key):
+                                item = models[model_key].search([('name', '=', item_name)], limit=1)
+                                if not item:
+                                    item = models[model_key].create({'name': item_name})
+                                molecule.write({field_name: item.id})
+                    else:  # Many2many
+                        item_ids = []
+                        for item_name in items:
+                            if self._is_valid_field_value(item_name, model_key):
+                                item = models[model_key].search([('name', '=', item_name)], limit=1)
+                                if not item:
+                                    item = models[model_key].create({'name': item_name})
+                                item_ids.append(item.id)
+                        if item_ids:
+                            # Utiliser (6, 0, ids) pour remplacer complètement la relation
+                            molecule.write({field_name: [(6, 0, item_ids)]})
 
     def _process_molecule_relations(self, molecule, row, models):
         """Traite les relations Many2many et Many2one pour une molécule"""
